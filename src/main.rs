@@ -1,7 +1,9 @@
 mod card;
+mod card_img;
 mod game;
 mod theme;
 mod ui;
+mod ui_image;
 
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEventKind, MouseButton, MouseEventKind},
@@ -14,6 +16,7 @@ use std::io;
 use std::os::unix::io::{AsRawFd, FromRawFd};
 use std::time::{Duration, Instant};
 use ui::{AppState, Cursor, Selection};
+use ui_image::ImageRenderer;
 
 fn open_tty() -> io::Result<File> {
     File::options().read(true).write(true).open("/dev/tty")
@@ -54,13 +57,35 @@ fn main() -> io::Result<()> {
 fn run_app(terminal: &mut Terminal<CrosstermBackend<File>>) -> io::Result<()> {
     let mut state = AppState::new();
     let mut last_click: Option<(u16, u16, Instant)> = None;
+    let mut image_renderer = ImageRenderer::new();
+    let mut use_image_mode = image_renderer.is_some();
 
     loop {
-        terminal.draw(|frame| ui::render(frame, &state))?;
+        terminal.draw(|frame| {
+            if use_image_mode {
+                if let Some(ref mut renderer) = image_renderer {
+                    ui_image::render(frame, &state, renderer);
+                } else {
+                    ui::render(frame, &state);
+                }
+            } else {
+                ui::render(frame, &state);
+            }
+        })?;
 
         if state.game.is_won() {
             state.message = Some("Congratulations! You won! Press N for new game, Q to quit.".to_string());
-            terminal.draw(|frame| ui::render(frame, &state))?;
+            terminal.draw(|frame| {
+                if use_image_mode {
+                    if let Some(ref mut renderer) = image_renderer {
+                        ui_image::render(frame, &state, renderer);
+                    } else {
+                        ui::render(frame, &state);
+                    }
+                } else {
+                    ui::render(frame, &state);
+                }
+            })?;
             loop {
                 if event::poll(Duration::from_millis(100))? {
                     if let Event::Key(key) = event::read()? {
@@ -135,6 +160,18 @@ fn run_app(terminal: &mut Terminal<CrosstermBackend<File>>) -> io::Result<()> {
                         }
                         KeyCode::Char('d') | KeyCode::Char('D') => {
                             state.game.draw_from_stock();
+                        }
+                        KeyCode::Char('i') | KeyCode::Char('I') => {
+                            if image_renderer.is_some() {
+                                use_image_mode = !use_image_mode;
+                                state.message = Some(if use_image_mode {
+                                    "Image mode".to_string()
+                                } else {
+                                    "Text mode".to_string()
+                                });
+                            } else {
+                                state.message = Some("Image mode not available (terminal doesn't support it)".to_string());
+                            }
                         }
                         KeyCode::Left => {
                             state.cursor = move_cursor_left(&state.cursor);
@@ -330,17 +367,14 @@ fn handle_enter(state: &mut AppState) {
             state.message = Some("No valid move for this card.".to_string());
         }
         Cursor::Tableau(col) => {
-            // Try foundation first
             if state.game.move_tableau_to_foundation(col) {
                 return;
             }
-            // Try moving to another tableau column
             let pile = &state.game.tableau[col];
             if pile.is_empty() {
                 state.message = Some("Empty column.".to_string());
                 return;
             }
-            // Find the first face-up card
             let first_face_up = pile.iter().position(|c| c.face_up);
             if let Some(card_idx) = first_face_up {
                 for to_col in 0..7 {
@@ -355,7 +389,6 @@ fn handle_enter(state: &mut AppState) {
             state.message = Some("No valid auto-move.".to_string());
         }
         Cursor::Foundation(i) => {
-            // Try moving foundation card to tableau
             for col in 0..7 {
                 if state.game.move_foundation_to_tableau(i, col) {
                     return;
@@ -380,7 +413,6 @@ fn handle_mouse(
             state.hint_text = None;
             state.message = None;
 
-            // Detect double-click (within 400ms at same position)
             let is_double_click = if let Some((lx, ly, lt)) = last_click {
                 now.duration_since(*lt) < Duration::from_millis(400)
                     && (*lx as i16 - x as i16).unsigned_abs() <= 2
@@ -395,7 +427,6 @@ fn handle_mouse(
             let top_row_y_start = 2u16;
             let top_row_y_end = 10u16;
 
-            // Top row
             if y >= top_row_y_start && y < top_row_y_end {
                 let offset_x = x.saturating_sub(1);
                 if offset_x < col_width {
@@ -415,7 +446,6 @@ fn handle_mouse(
                     }
                     return;
                 } else {
-                    // Foundations start after a gap
                     let found_start = col_width * 2 + 5;
                     if x >= found_start {
                         let idx = ((x - found_start) / col_width) as usize;
@@ -432,7 +462,6 @@ fn handle_mouse(
                 }
             }
 
-            // Tableau
             if y >= tableau_start_y {
                 let offset_x = x.saturating_sub(1);
                 let col = (offset_x / col_width) as usize;

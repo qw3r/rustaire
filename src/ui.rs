@@ -114,6 +114,8 @@ fn render_title_bar(frame: &mut Frame, area: Rect, _state: &AppState, theme: &Th
             Span::styled("raw ", Style::default().fg(theme.label_bright)),
             Span::styled(" T", Style::default().fg(theme.hotkey).add_modifier(Modifier::BOLD)),
             Span::styled("heme ", Style::default().fg(theme.label_bright)),
+            Span::styled(" I", Style::default().fg(theme.hotkey).add_modifier(Modifier::BOLD)),
+            Span::styled("mg ", Style::default().fg(theme.label_bright)),
             Span::styled(" Q", Style::default().fg(theme.hotkey).add_modifier(Modifier::BOLD)),
             Span::styled("uit", Style::default().fg(theme.label_bright)),
         ]),

@@ -1,10 +1,12 @@
 [package]
 name = "rustaire"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 
 [dependencies]
-ratatui = "0.29"
+ratatui = "0.30"
+ratatui-image = "11"
 crossterm = { version = "0.28", features = ["event-stream"] }
+image = "0.25"
 rand = "0.8"
 libc = "0.2"
