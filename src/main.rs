@@ -158,6 +158,15 @@ fn run_app(terminal: &mut Terminal<CrosstermBackend<File>>) -> io::Result<()> {
                         KeyCode::Enter => {
                             handle_enter(&mut state);
                         }
+                        KeyCode::Char('0') => {
+                            state.cursor = Cursor::Waste;
+                            handle_space(&mut state);
+                        }
+                        KeyCode::Char(c @ '1'..='7') => {
+                            let col = (c as usize) - ('1' as usize);
+                            state.cursor = Cursor::Tableau(col);
+                            handle_space(&mut state);
+                        }
                         _ => {}
                     }
                 }
