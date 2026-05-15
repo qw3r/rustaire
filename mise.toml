@@ -1,0 +1,11 @@
+[tools]
+rust = "latest"
+
+[tasks.build]
+description = "Build rustaire"
+run = "cargo build --release"
+
+[tasks.run]
+description = "Build and run rustaire (needs direct TTY)"
+raw = true
+run = "cargo run --release"
