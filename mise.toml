@@ -5,7 +5,7 @@ rust = "latest"
 description = "Build rustaire"
 run = "cargo build --release"
 
-[tasks.run]
-description = "Build and run rustaire (needs direct TTY)"
+[tasks.default]
+description = "Build and run rustaire"
 raw = true
 run = "cargo run --release"
