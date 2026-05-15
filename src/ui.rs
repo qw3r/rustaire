@@ -368,7 +368,7 @@ fn render_tableau_column(
 
         if card.face_up {
             let is_last = idx == pile.len() - 1;
-            let face_up_height = if is_last { 5u16 } else { 3u16 };
+            let face_up_height = if is_last { 4u16 } else { 2u16 };
             let card_area = Rect {
                 x: inner.x,
                 y: inner.y + y,
@@ -379,26 +379,24 @@ fn render_tableau_column(
             let color = if card.is_red() { theme.card_red } else { theme.card_black };
             let bg = if is_selected_card { theme.card_bg_selected } else { theme.card_bg };
             let style = Style::default().fg(color).bg(bg);
-            let border_color = if is_selected_card { theme.border_picked } else { theme.border_normal };
+            let border_style = if is_selected_card {
+                Style::default().fg(theme.border_picked).bg(bg)
+            } else {
+                Style::default().fg(theme.border_normal).bg(bg)
+            };
             let rank = card.rank.symbol();
             let suit = card.suit.symbol();
 
             let mut lines = vec![
                 Line::from(Span::styled(
-                    "──────────────",
-                    Style::default().fg(border_color),
+                    "┄┄┄┄┄┄┄┄┄┄┄┄┄┄",
+                    border_style,
                 )),
                 Line::from(Span::styled(
                     format!(" {:<2} {}         ", rank, suit),
                     style,
                 )),
             ];
-            if card_area.height >= 3 && !is_last {
-                lines.push(Line::from(Span::styled(
-                    format!("      {}        ", suit),
-                    style,
-                )));
-            }
             if is_last {
                 if card_area.height >= 3 {
                     lines.push(Line::from(Span::styled(
@@ -407,12 +405,6 @@ fn render_tableau_column(
                     )));
                 }
                 if card_area.height >= 4 {
-                    lines.push(Line::from(Span::styled(
-                        format!("         {}     ", suit),
-                        style,
-                    )));
-                }
-                if card_area.height >= 5 {
                     lines.push(Line::from(Span::styled(
                         format!("         {} {:>2} ", suit, rank),
                         style,
