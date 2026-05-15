@@ -1,5 +1,6 @@
 mod card;
 mod game;
+mod theme;
 mod ui;
 
 use crossterm::{
@@ -128,6 +129,12 @@ fn run_app(terminal: &mut Terminal<CrosstermBackend<File>>) -> io::Result<()> {
                             } else {
                                 state.message = Some("Cannot auto-complete yet (all cards must be face-up).".to_string());
                             }
+                        }
+                        KeyCode::Char('t') | KeyCode::Char('T') => {
+                            state.cycle_theme();
+                        }
+                        KeyCode::Char('d') | KeyCode::Char('D') => {
+                            state.game.draw_from_stock();
                         }
                         KeyCode::Left => {
                             state.cursor = move_cursor_left(&state.cursor);
