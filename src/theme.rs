@@ -3,6 +3,7 @@ use ratatui::style::Color;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ThemeId {
     Classic,
+    ClassicLight,
     Midnight,
     Dracula,
     Solarized,
@@ -14,6 +15,7 @@ impl ThemeId {
     pub fn all() -> &'static [ThemeId] {
         &[
             ThemeId::Classic,
+            ThemeId::ClassicLight,
             ThemeId::Midnight,
             ThemeId::Dracula,
             ThemeId::Solarized,
@@ -25,6 +27,7 @@ impl ThemeId {
     pub fn name(&self) -> &'static str {
         match self {
             ThemeId::Classic => "Classic",
+            ThemeId::ClassicLight => "Classic Light",
             ThemeId::Midnight => "Midnight",
             ThemeId::Dracula => "Dracula",
             ThemeId::Solarized => "Solarized",
@@ -42,6 +45,7 @@ impl ThemeId {
     pub fn theme(&self) -> Theme {
         match self {
             ThemeId::Classic => Theme::classic(),
+            ThemeId::ClassicLight => Theme::classic_light(),
             ThemeId::Midnight => Theme::midnight(),
             ThemeId::Dracula => Theme::dracula(),
             ThemeId::Solarized => Theme::solarized(),
@@ -94,6 +98,34 @@ impl Theme {
             card_black: Color::White,
             card_bg: Color::Rgb(30, 30, 30),
             card_bg_selected: Color::Rgb(40, 70, 40),
+            card_back: Color::Rgb(70, 70, 200),
+            card_back_pattern: Color::Rgb(70, 70, 200),
+            label_dim: Color::Rgb(100, 100, 100),
+            label_bright: Color::Rgb(180, 180, 180),
+            hotkey: Color::Cyan,
+            score_color: Color::Yellow,
+            moves_color: Color::Cyan,
+            hint_color: Color::Green,
+            empty_slot: Color::Rgb(80, 80, 80),
+            recycle_color: Color::Yellow,
+        }
+    }
+
+    pub fn classic_light() -> Self {
+        Theme {
+            bg: Color::Rgb(0, 80, 40),
+            title_bar_bg: Color::Rgb(20, 20, 40),
+            title_text: Color::White,
+            title_accent: Color::Yellow,
+            status_bar_bg: Color::Rgb(20, 20, 40),
+            separator: Color::Rgb(60, 120, 80),
+            border_normal: Color::Rgb(60, 120, 80),
+            border_selected: Color::Cyan,
+            border_picked: Color::Rgb(0, 180, 0),
+            card_red: Color::Rgb(200, 0, 0),
+            card_black: Color::Rgb(20, 20, 20),
+            card_bg: Color::Rgb(245, 245, 240),
+            card_bg_selected: Color::Rgb(200, 240, 200),
             card_back: Color::Rgb(70, 70, 200),
             card_back_pattern: Color::Rgb(70, 70, 200),
             label_dim: Color::Rgb(100, 100, 100),
