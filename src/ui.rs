@@ -43,7 +43,7 @@ impl AppState {
             hint_text: None,
             message: None,
             auto_completing: false,
-            theme_id: ThemeId::Classic,
+            theme_id: ThemeId::ClassicLight,
         }
     }
 
@@ -366,9 +366,12 @@ fn render_tableau_column(
             _ => false,
         };
 
+        let prev_face_up = idx > 0 && pile[idx - 1].face_up;
+
         if card.face_up {
             let is_last = idx == pile.len() - 1;
-            let face_up_height = if is_last { 4u16 } else { 2u16 };
+            let show_border = prev_face_up;
+            let face_up_height = if is_last { 4u16 } else if show_border { 2u16 } else { 1u16 };
             let card_area = Rect {
                 x: inner.x,
                 y: inner.y + y,
@@ -387,16 +390,17 @@ fn render_tableau_column(
             let rank = card.rank.symbol();
             let suit = card.suit.symbol();
 
-            let mut lines = vec![
-                Line::from(Span::styled(
+            let mut lines = Vec::new();
+            if show_border {
+                lines.push(Line::from(Span::styled(
                     "┄┄┄┄┄┄┄┄┄┄┄┄┄┄",
                     border_style,
-                )),
-                Line::from(Span::styled(
-                    format!(" {:<2} {}         ", rank, suit),
-                    style,
-                )),
-            ];
+                )));
+            }
+            lines.push(Line::from(Span::styled(
+                format!(" {:<2} {}         ", rank, suit),
+                style,
+            )));
             if is_last {
                 if card_area.height >= 3 {
                     lines.push(Line::from(Span::styled(
